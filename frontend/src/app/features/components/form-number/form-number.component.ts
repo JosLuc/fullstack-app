@@ -1,15 +1,17 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { ApiService } from '../../../services/api.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 interface CalculationResult {
+  id?: number;
   number1: number;
   number2: number;
   number3: number;
@@ -45,10 +47,9 @@ export class FormComponent {
     'actions',
   ];
   dataSource = new MatTableDataSource<CalculationResult>();
-
   calculations: CalculationResult[] = [];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private apiService: ApiService) {
     this.form = this.fb.group({
       number1: ['', Validators.required],
       number2: ['', Validators.required],
@@ -59,54 +60,65 @@ export class FormComponent {
   onSubmit() {
     if (this.form.valid) {
       const { number1, number2, number3 } = this.form.value;
-      const newCalculation: CalculationResult = {
-        number1,
-        number2,
-        number3,
-        status: 'Processing...',
-      };
-      this.calculations.push(newCalculation);
-      this.dataSource.data = this.calculations;
 
-      // Simulate a delay for processing
-      setTimeout(() => {
-        newCalculation.status = 'Successfully';
-        newCalculation.average = this.calculateAverage(
-          number1,
-          number2,
-          number3
+      this.apiService
+        .createProcessing({ num1: number1, num2: number2, num3: number3 })
+        .subscribe(
+          (response) => {
+            const newCalculation: CalculationResult = {
+              id: response.id,
+              number1,
+              number2,
+              number3,
+              status: response.status,
+            };
+            this.calculations.push(newCalculation);
+            this.dataSource.data = this.calculations;
+
+            this.checkStatus(response.id, newCalculation);
+          },
+          (error) => {
+            console.error(error);
+            alert('Error creating processing.');
+          }
         );
-        newCalculation.median = this.calculateMedian([
-          number1,
-          number2,
-          number3,
-        ]);
-        this.dataSource.data = [...this.calculations];
-      }, 2000);
     }
   }
 
-  private calculateAverage(
-    number1: number,
-    number2: number,
-    number3: number
-  ): number {
-    const average = (number1 + number2 + number3) / 3;
-    return parseFloat(average.toFixed(2));
-  }
-
-  private calculateMedian(numbers: number[]): number {
-    numbers.sort((a, b) => a - b);
-    const mid = Math.floor(numbers.length / 2);
-    const median =
-      numbers.length % 2 !== 0
-        ? numbers[mid]
-        : (numbers[mid - 1] + numbers[mid]) / 2;
-    return parseFloat(median.toFixed(2));
+  private checkStatus(id: number, calculation: CalculationResult) {
+    const interval = setInterval(() => {
+      this.apiService.getStatus(id).subscribe(
+        (response) => {
+          calculation.status = response.status;
+          if (response.status === 'Successfully') {
+            calculation.average = response.average;
+            calculation.median = response.median;
+            this.dataSource.data = [...this.calculations];
+            clearInterval(interval);
+          }
+        },
+        (error) => {
+          console.error(error);
+          alert('Error fetching status.');
+        }
+      );
+    }, 2000);
   }
 
   removeCalculation(index: number) {
-    this.calculations.splice(index, 1);
-    this.dataSource.data = [...this.calculations];
+    const calculation = this.calculations[index];
+    if (calculation.id) {
+      this.apiService.deleteProcessing(calculation.id).subscribe(
+        () => {
+          this.calculations.splice(index, 1);
+          this.dataSource.data = [...this.calculations];
+          alert('Processing deleted successfully!');
+        },
+        (error) => {
+          console.error(error);
+          alert('Error deleting processing.');
+        }
+      );
+    }
   }
 }
