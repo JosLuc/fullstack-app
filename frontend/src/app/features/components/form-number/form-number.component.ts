@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { ApiService } from '../../../services/api.service';
@@ -35,7 +35,7 @@ interface CalculationResult {
   templateUrl: './form-number.component.html',
   styleUrls: ['./form-number.component.scss'],
 })
-export class FormComponent {
+export class FormComponent implements OnInit {
   form: FormGroup;
   displayedColumns: string[] = [
     'number1',
@@ -57,6 +57,10 @@ export class FormComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.loadFromLocalStorage();
+  }
+
   onSubmit() {
     if (this.form.valid) {
       const { number1, number2, number3 } = this.form.value;
@@ -73,8 +77,7 @@ export class FormComponent {
               status: response.status,
             };
             this.calculations.push(newCalculation);
-            this.dataSource.data = this.calculations;
-
+            this.updateTableData();
             this.checkStatus(response.id, newCalculation);
           },
           (error) => {
@@ -93,7 +96,7 @@ export class FormComponent {
           if (response.status === 'Successfully') {
             calculation.average = response.average;
             calculation.median = response.median;
-            this.dataSource.data = [...this.calculations];
+            this.updateTableData();
             clearInterval(interval);
           }
         },
@@ -111,7 +114,7 @@ export class FormComponent {
       this.apiService.deleteProcessing(calculation.id).subscribe(
         () => {
           this.calculations.splice(index, 1);
-          this.dataSource.data = [...this.calculations];
+          this.updateTableData();
           alert('Processing deleted successfully!');
         },
         (error) => {
@@ -119,6 +122,23 @@ export class FormComponent {
           alert('Error deleting processing.');
         }
       );
+    }
+  }
+
+  private updateTableData() {
+    this.dataSource.data = [...this.calculations];
+    this.saveToLocalStorage();
+  }
+
+  private saveToLocalStorage() {
+    localStorage.setItem('calculations', JSON.stringify(this.calculations));
+  }
+
+  private loadFromLocalStorage() {
+    const savedData = localStorage.getItem('calculations');
+    if (savedData) {
+      this.calculations = JSON.parse(savedData);
+      this.dataSource.data = this.calculations;
     }
   }
 }

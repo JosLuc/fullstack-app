@@ -14,11 +14,11 @@ html {
       density: 0,
     )
   );
-} /* You can add global styles to this file, and also import other style files */
+}
 
 html,
 body {
-  overflow: hidden !important; // Remove o scroll da tela
+  overflow: hidden !important;
   margin: 0;
   padding: 0;
   width: 100vw;
