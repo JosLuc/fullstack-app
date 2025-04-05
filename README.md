@@ -6,7 +6,13 @@ Este é um projeto fullstack que consiste em:
 - **Backend**: Django
 - **Mensageria**: RabbitMQ
 - **Worker**: Celery + Django
-- **Banco de Dados**: SQLite/PostgreSQL
+- **Banco de Dados**: SQLite
+
+## Objetivo da Aplicação
+
+1. O usuário insere três números e clica em "Calculate".
+2. A tabela exibe os números enviados e o status inicial como "Processing...".
+3. Quando o worker finaliza o cálculo, a tela atualiza o status para "Successfully" e exibe os resultados (média e mediana).
 
 ## Como rodar a aplicação
 
@@ -54,6 +60,73 @@ O arquivo `docker-compose.yml` está configurado para gerenciar os seguintes ser
   ```
 
 - Para reconstruir os containers:
+
+  ```bash
+  docker compose up -d --build
+  ```
+
+# Fullstack App (English ver)
+
+This is a fullstack project consisting of:
+
+- **Frontend**: Angular
+- **Backend**: Django
+- **Messaging**: RabbitMQ
+- **Worker**: Celery + Django
+- **Database**: SQLite
+
+## Application Objective
+
+1. The user enters three numbers and clicks "Calculate."
+2. The table displays the submitted numbers and the initial status as "Processing...".
+3. When the worker completes the calculation, the screen updates the status to "Successfully" and displays the results (average and median).
+
+## How to Run the Application
+
+### Prerequisites
+
+Make sure you have the following tool installed on your machine:
+
+- [Docker](https://www.docker.com/)
+
+### Steps to Run the Project
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/JosLuc/fullstack-app.git
+cd fullstack-app
+```
+
+2. Start the containers with Docker Compose:
+
+```bash
+docker compose up -d --build
+```
+
+3. Access the application:
+
+- The application is available at: [http://localhost:4200](http://localhost:4200)
+
+## Docker Compose Structure
+
+The `docker-compose.yml` file is configured to manage the following services:
+
+- **frontend**: Contains the Angular code.
+- **backend**: Contains the Django code.
+- **rabbitmq**: Messaging service.
+- **worker**: Celery service for asynchronous tasks.
+- **db**: SQLite is not included in Docker Compose because it is a lightweight embedded database stored directly in the application's file system, so it does not need to be managed by Docker Compose.
+
+### Useful Commands
+
+- To stop the containers:
+
+  ```bash
+  docker compose down
+  ```
+
+- To rebuild the containers:
 
   ```bash
   docker compose up -d --build
