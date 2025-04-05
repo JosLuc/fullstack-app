@@ -14,6 +14,20 @@ Este é um projeto fullstack que consiste em:
 2. A tabela exibe os números enviados e o status inicial como "Processing...".
 3. Quando o worker finaliza o cálculo, a tela atualiza o status para "Successfully" e exibe os resultados (média e mediana).
 
+### Observação sobre o Docker
+
+No Windows, é necessário que o Docker Desktop esteja aberto para que os comandos do Docker funcionem corretamente. Já no Linux, o Docker funciona como um serviço do sistema operacional. Certifique-se de que o serviço do Docker (`dockerd`) esteja ativo antes de executar os comandos. Você pode verificar o status do serviço no Linux com:
+
+```bash
+sudo systemctl status docker
+```
+
+E, se necessário, iniciar o serviço com:
+
+```bash
+sudo systemctl start docker
+```
+
 ## Como rodar a aplicação
 
 ### Pré-requisitos
@@ -80,6 +94,20 @@ This is a fullstack project consisting of:
 1. The user enters three numbers and clicks "Calculate."
 2. The table displays the submitted numbers and the initial status as "Processing...".
 3. When the worker completes the calculation, the screen updates the status to "Successfully" and displays the results (average and median).
+
+### Note about Docker
+
+On Windows, Docker Desktop must be open for Docker commands to work properly. On Linux, Docker runs as a system service. Make sure the Docker service (`dockerd`) is active before running the commands. You can check the service status on Linux with:
+
+```bash
+sudo systemctl status docker
+```
+
+And, if necessary, start the service with:
+
+```bash
+sudo systemctl start docker
+```
 
 ## How to Run the Application
 

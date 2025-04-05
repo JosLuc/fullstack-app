@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { ApiService } from '../../../services/api.service';
@@ -35,7 +35,7 @@ interface CalculationResult {
   templateUrl: './form-number.component.html',
   styleUrls: ['./form-number.component.scss'],
 })
-export class FormComponent implements OnInit {
+export class FormComponent {
   form: FormGroup;
   displayedColumns: string[] = [
     'number1',
@@ -57,10 +57,6 @@ export class FormComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.loadFromLocalStorage();
-  }
-
   onSubmit() {
     if (this.form.valid) {
       const { number1, number2, number3 } = this.form.value;
@@ -77,7 +73,8 @@ export class FormComponent implements OnInit {
               status: response.status,
             };
             this.calculations.push(newCalculation);
-            this.updateTableData();
+            this.dataSource.data = this.calculations;
+
             this.checkStatus(response.id, newCalculation);
           },
           (error) => {
@@ -96,7 +93,7 @@ export class FormComponent implements OnInit {
           if (response.status === 'Successfully') {
             calculation.average = response.average;
             calculation.median = response.median;
-            this.updateTableData();
+            this.dataSource.data = [...this.calculations];
             clearInterval(interval);
           }
         },
@@ -114,7 +111,7 @@ export class FormComponent implements OnInit {
       this.apiService.deleteProcessing(calculation.id).subscribe(
         () => {
           this.calculations.splice(index, 1);
-          this.updateTableData();
+          this.dataSource.data = [...this.calculations];
           alert('Processing deleted successfully!');
         },
         (error) => {
@@ -122,23 +119,6 @@ export class FormComponent implements OnInit {
           alert('Error deleting processing.');
         }
       );
-    }
-  }
-
-  private updateTableData() {
-    this.dataSource.data = [...this.calculations];
-    this.saveToLocalStorage();
-  }
-
-  private saveToLocalStorage() {
-    localStorage.setItem('calculations', JSON.stringify(this.calculations));
-  }
-
-  private loadFromLocalStorage() {
-    const savedData = localStorage.getItem('calculations');
-    if (savedData) {
-      this.calculations = JSON.parse(savedData);
-      this.dataSource.data = this.calculations;
     }
   }
 }
